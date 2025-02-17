@@ -1,18 +1,29 @@
-// Import the express module
 const express = require('express');
-
-// Create an express application
+const bodyParser = require('body-parser');
 const app = express();
 
-// Define the port number
-const port = 3000;
+app.set('view engine', 'ejs');
+app.use(bodyParser.urlencoded({ extended: true }));
 
-// Create a GET endpoint at '/hello'
-app.get('/hello', (req, res) => {
-  res.json({ message: 'Hello, World!' });
+// GET route for root URL
+app.get('/', (req, res) => {
+  res.render('home.ejs');
 });
 
-// Start the server
-app.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`);
+// GET route for login page
+app.get('/login', (req, res) => {
+  res.render('login.ejs', {message: "Hi there"});
 });
+
+// POST route for handling login logic
+app.post('/login', (req, res) => {
+  const username = req.body.username;
+  const password = req.body.password;
+  // Add your login logic here
+  res.send(`Username: ${username}, Password: ${password}`);
+});
+
+app.listen(3000, () => {
+  console.log('Server is running on http://localhost:3000');
+});
+
