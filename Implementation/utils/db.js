@@ -7,7 +7,7 @@ class Database {
 
   _connect() {
     mongoose
-      .connect(`mongodb+srv://dbPractice:62dlIxUYBhDGArPI@cluster0.isquhpy.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`)
+      .connect(`mongodb+srv://dbPractice:62dlIxUYBhDGArPI@cluster0.isquhpy.mongodb.net/fintrack?retryWrites=true&w=majority&appName=Cluster0`)
       .then(() => {
         console.log('Database connection successful');
       })
