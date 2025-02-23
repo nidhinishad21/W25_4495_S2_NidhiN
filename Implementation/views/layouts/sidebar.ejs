@@ -1,0 +1,59 @@
+<!-- Hamburger button that appears on mobile -->
+<button class="btn btn-dark d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar">
+  <i class="bi bi-list"></i>
+</button>
+
+<!-- Sidebar as Offcanvas -->
+<div class="offcanvas-md offcanvas-start bg-dark text-white" tabindex="-1" id="sidebar" style="width: 280px;">
+  <div class="offcanvas-header d-md-none">
+      <h5 class="offcanvas-title">Menu</h5>
+      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" data-bs-target="#sidebar" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body d-flex flex-column p-3">
+      <!-- Navigation Menu -->
+      <ul class="nav nav-pills flex-column mb-auto flex-grow-1">
+          <li class="nav-item mb-2">
+              <a href="/dashboard" class="nav-link <%= path === '/dashboard' ? 'active' : 'text-white' %>">
+                  <i class="bi bi-speedometer2 me-2"></i>
+                  Dashboard
+              </a>
+          </li>
+          <li class="nav-item mb-2">
+              <a href="/dashboard/insights" class="nav-link <%= path === '/dashboard/insights' ? 'active' : 'text-white' %>">
+                  <i class="bi bi-graph-up me-2"></i>
+                  Insights
+              </a>
+          </li>
+          <li class="nav-item mb-2">
+              <a href="/dashboard/transactions" class="nav-link <%= path === '/dashboard/transactions' ? 'active' : 'text-white' %>">
+                  <i class="bi bi-list-ul me-2"></i>
+                  Transactions
+              </a>
+          </li>
+          <li class="nav-item mb-2">
+              <a href="/dashboard/categories" class="nav-link <%= path === '/dashboard/categories' ? 'active' : 'text-white' %>">
+                  <i class="bi bi-tags me-2"></i>
+                  Categories
+              </a>
+          </li>
+      </ul>
+
+      <!-- User Section -->
+      <hr>
+      <div class="dropdown dropup">
+          <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+              <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ffffff'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E" alt="User" width="32" height="32" class="rounded-circle me-2 bg-secondary">
+              <strong><%= firstname %></strong>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser1">
+              <li><a class="dropdown-item" href="/profile">Profile</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                  <form action="/logout" method="POST">
+                      <button type="submit" class="dropdown-item">Sign out</button>
+                  </form>
+              </li>
+          </ul>
+      </div>
+  </div>
+</div>

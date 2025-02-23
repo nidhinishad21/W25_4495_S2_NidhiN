@@ -1,18 +1,28 @@
-// Import the express module
 const express = require('express');
+const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
+const authRoutes = require('./routes/auth');
+const dashRoutes = require('./routes/dash');
+const db = require('./utils/db'); // Make sure this is before your routes
 
-// Create an express application
 const app = express();
+app.use(cookieParser()); 
+app.use(express.json());
+app.set('view engine', 'ejs');
+app.use(bodyParser.urlencoded({ extended: true }));
 
-// Define the port number
-const port = 3000;
+app.use('/auth', authRoutes);
+app.use('/dashboard', dashRoutes);
 
-// Create a GET endpoint at '/hello'
-app.get('/hello', (req, res) => {
-  res.json({ message: 'Hello, World!' });
+app.get('/', (req, res) => {
+  const token = req.cookies['u-xarh'];
+    if (token) {
+        res.redirect("/dashboard");
+    }
+  res.render('visitor/home.ejs');
 });
 
-// Start the server
-app.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`);
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
