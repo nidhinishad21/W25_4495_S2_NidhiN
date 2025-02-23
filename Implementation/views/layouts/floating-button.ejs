@@ -1,0 +1,33 @@
+<!-- floating-button.ejs -->
+<button type="button" class="btn btn-primary rounded-circle position-fixed d-flex align-items-center justify-content-center" 
+        style="bottom: 2rem; right: 2rem; width: 60px; height: 60px; box-shadow: 0 2px 12px rgba(0,0,0,0.2);"
+        data-bs-toggle="modal" 
+        data-bs-target="#addExpenseModal">
+    <i class="bi bi-plus-lg fs-4"></i>
+</button>
+
+<!-- Modal for Adding Expense -->
+<div class="modal fade" id="addExpenseModal" tabindex="-1" aria-labelledby="addExpenseModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addExpenseModalLabel">Add Expense</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="expenseForm" action="/add-expense" method="POST">
+                    <div class="mb-3">
+                        <label for="expenseInput" class="form-label">Enter your expense</label>
+                        <input type="text" class="form-control" id="expenseInput" name="expense" 
+                               placeholder="e.g., had 50$ dinner" required>
+                        <div class="form-text">Just type naturally - we'll figure out the details!</div>
+                    </div>
+                    <div class="modal-footer px-0 pb-0">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Add Expense</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
