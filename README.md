@@ -16,3 +16,6 @@ Features:
 -Visualization of expense and savings. 
 
 -categorization of expenses (e.g. dining, grocery, rent, fuel) 
+#To run the app
+cd/Implementation
+node index.js
