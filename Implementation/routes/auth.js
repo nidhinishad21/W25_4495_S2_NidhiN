@@ -5,12 +5,26 @@
  const bcrypt = require('bcrypt');
  const jwt = require('jsonwebtoken');
 
-// User registration
-
+// Get pages
 router.get('/register', (req, res) => {
-    res.render('register.ejs');
- })
- router.post('/register', async (req, res) => {
+    const token = req.cookies['u-xarh'];
+    if (token) {
+        res.redirect("/dashboard");
+    }
+    res.render('visitor/register.ejs');
+  })
+  
+router.get('/login', (req, res) => {
+    const token = req.cookies['u-xarh'];
+    if (token) {
+        res.redirect("/dashboard");
+    }
+    res.render('visitor/login.ejs');
+})
+
+
+// User registration
+router.post('/register', async (req, res) => {
     try {
         const { username, password, firstname, lastname, email } = req.body;
 
@@ -27,34 +41,63 @@ router.get('/register', (req, res) => {
         res.status(201).json({ message: 'User registered successfully' });
     } catch (error) {
         console.log(error);
-        res.status(500).json({ error: 'Registration failed' });
+        res.render("common/error.ejs", { message: 'Registration failed' });
     }
  });
-
- router.get('/login', (req, res) => {
-    res.render('login.ejs');
- })
 
 // User login
  router.post('/login', async (req, res) => {
     try {
         const { username, password } = req.body;
+
         const user = await User.findOne({ username });
         if (!user) {
+            console.log("user not found");
             return res.status(401).json({ error: 'Authentication failed' });
         }
         const passwordMatch = await bcrypt.compare(password, user.password);
 
-        if (!passwordMatch) {
+        if (passwordMatch) {
+            const token = jwt.sign({ userId: user.username, firstname: user.firstname }, 'your-secret-key', {
+                expiresIn: '24h',
+                });
+        
+            res.cookie('u-xarh', token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'lax',  // Changed to 'lax' to allow redirect
+                maxAge: 24 * 60 * 60 * 1000,
+                path: '/'  // Ensure cookie is available across all paths
+            });
+    
+            res.redirect("/dashboard");
+            
+        } else {
             return res.status(401).json({ error: 'Authentication failed' });
         }
-        const token = jwt.sign({ userId: user._id }, 'your-secret-key', {
-        expiresIn: '1h',
-        });
-        res.status(200).json({ token });
     } catch (error) {
-        res.status(500).json({ error: 'Login failed' });
+        console.log(error);
+        res.render("common/error.ejs", { message: 'Login failed' });
     }
  });
+
+
+ router.post('/logout', (req, res) => {
+    try {
+        // Clear the authentication cookie
+        res.clearCookie('u-xarh', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            path: '/'  // Make sure path matches the one used when setting the cookie
+        });
+        
+        // Redirect to login page
+        res.redirect('/');
+    } catch (error) {
+        console.log(error);
+        res.render("common/error.ejs", { message: 'Logout failed' });
+    }
+});
 
 module.exports = router;

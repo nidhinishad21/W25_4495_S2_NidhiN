@@ -1,18 +1,26 @@
 const express = require('express');
+const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const authRoutes = require('./routes/auth');
-const db = require('./utils/db');
-const app = express();
+const dashRoutes = require('./routes/dash');
+const db = require('./utils/db'); // Make sure this is before your routes
 
+const app = express();
+app.use(cookieParser()); 
 app.use(express.json());
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use('/auth', authRoutes);
+app.use('/dashboard', dashRoutes);
 
 app.get('/', (req, res) => {
-  res.render('home');
-})
+  const token = req.cookies['u-xarh'];
+    if (token) {
+        res.redirect("/dashboard");
+    }
+  res.render('visitor/home.ejs');
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
