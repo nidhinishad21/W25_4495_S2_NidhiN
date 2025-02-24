@@ -1,9 +1,35 @@
-<div class="d-flex flex-column vh-100"> 
-    <%- include('../layouts/loggedheader'); -%>
 
-
-
-
-    <%- include('../layouts/floating-button') %>
-    <%- include('../layouts/sidebar'); -%>
+<%- include('../layouts/loggedheader'); -%>
+<div class="row">
+    <div class="col-3">
+        <div class="d-flex flex-column"> 
+            <%- include('../layouts/sidebar'); -%>
+        </div>
+    </div>
+    <div class="col-6">
+        <div class="card m-3">
+            <div class="card-header">
+                <h3>Expenses this month</h3>
+                <div class="mb-3">
+                    <label for="dateBootstrap" class="form-label">From</label>
+                    <input type="date" 
+                           class="form-control" 
+                           id="dateBootstrap" 
+                           name="dateBootstrap"
+                           required>
+                    <label for="dateBootstrap" class="form-label">To</label>
+                    <input type="date" 
+                           class="form-control" 
+                           id="dateBootstrap" 
+                           name="dateBootstrap"
+                           required>
+                </div>
+            </div>
+            <div class="card-body">
+                <%- include('../layouts/piechart') %>
+            </div>"
+        </div>
+    </div>
 </div>
+<%- include('../layouts/floating-button') %>
+<%- include('../layouts/footer'); -%>
