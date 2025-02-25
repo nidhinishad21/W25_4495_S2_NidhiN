@@ -1,0 +1,72 @@
+
+<!-- Chart container -->
+<div style="width: 400px; height:400px;">
+    <canvas id="pieChart"></canvas>
+</div>
+
+<script>
+    let all_data = <%- JSON.stringify(c_data) %>;
+    const labels = all_data.labels;
+    const values = all_data.values;
+
+    const barColors = [
+        "red",
+        "blue",
+        "green",
+        "purple",
+        "orange",
+        "yellow",
+        "brown",
+        "pink",
+        "grey",
+        "cyan"
+    ];
+
+    new Chart("pieChart", {
+        type: "pie",
+        data: {
+            labels: labels,
+            datasets: [{
+            backgroundColor: barColors,
+            data: values
+            }]
+        },
+        options: {
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            // Customize the legend labels
+                            generateLabels: function(chart) {
+                                const data = chart.data;
+                                const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                
+                                return data.labels.map((label, i) => {
+                                    const value = data.datasets[0].data[i];
+                                    const percentage = ((value * 100) / total).toFixed(1);
+                                    
+                                    return {
+                                        text: `${label}: $${value.toLocaleString()} (${percentage}%)`,
+                                        fillStyle: chart.data.datasets[0].backgroundColor[i],
+                                        index: i
+                                    };
+                                });
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const value = context.parsed;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((value * 100) / total).toFixed(1);
+                                return `${context.label}: $${value.toLocaleString()} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        
+    });
+    
+</script>
