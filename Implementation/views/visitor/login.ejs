@@ -1,27 +1,32 @@
 <%- include('../layouts/header'); -%>
 <body class="d-flex flex-column min-vh-100">
-    <div class="container flex-grow-1"">
-        <div class="row justify-content-md-center">
-            <div class="col-5 mt-3">
-                <div class="card">
-                    <div class="card-body">
+    <div class="container flex-grow-1">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6 col-xl-5 col-sm-10 col-12 my-4">
+                <div class="card shadow">
+                    <div class="card-body p-4">
                         <% if (typeof message !== 'undefined') { %>
-                            <h5 class="text-success"><%= message %></h5>
+                            <div class="alert alert-success" role="alert">
+                                <%= message %>
+                            </div>
                         <% } %>
-                        <center><h5 class="card-title m-2">Login</h5></center>
-                      <form action="/auth/login" method="POST">
-                        <div class="form-group m-2">
-                            <label for="username">Username:</label>
-                            <input type="text" class="form-control" id="username" name="username" required>
-                        </div>
-                        <div class="form-group m-2">
-                            <label for="password">Password:</label>
-                            <input type="password" class="form-control" id="password" name="password" required>
-                        </div>
-                        <div class="form-group m-2">
-                          <button type="submit" class="btn btn-primary">Login</button>
-                        </div>
-                    </form>
+                        <h4 class="card-title text-center mb-4">Login</h4>
+                        <form action="/auth/login" method="POST">
+                            <div class="mb-3">
+                                <label for="username" class="form-label">Username</label>
+                                <input type="text" class="form-control" id="username" name="username" placeholder="Enter your username" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
+                            </div>
+                            <div class="d-grid gap-2 mt-4">
+                                <button type="submit" class="btn btn-primary">Login</button>
+                            </div>
+                            <div class="text-center mt-3">
+                                <p class="mb-0">Don't have an account? <a href="/auth/register">Register here</a></p>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -32,4 +37,3 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
 </html>
-
