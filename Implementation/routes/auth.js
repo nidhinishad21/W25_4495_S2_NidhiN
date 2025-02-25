@@ -38,7 +38,8 @@ router.post('/register', async (req, res) => {
                 email
             });
         await user.save();
-        res.status(201).json({ message: 'User registered successfully' });
+        res.render("visitor/login.ejs", { message: 'User registered successfully' })
+        // res.status(201).json({ message: 'User registered successfully' });
     } catch (error) {
         console.log(error);
         res.render("common/error.ejs", { message: 'Registration failed' });
@@ -53,7 +54,7 @@ router.post('/register', async (req, res) => {
         const user = await User.findOne({ username });
         if (!user) {
             console.log("user not found");
-            return res.status(401).json({ error: 'Authentication failed' });
+            res.render("common/error.ejs", { message: 'Login failed' });
         }
         const passwordMatch = await bcrypt.compare(password, user.password);
 
@@ -73,7 +74,7 @@ router.post('/register', async (req, res) => {
             res.redirect("/dashboard");
             
         } else {
-            return res.status(401).json({ error: 'Authentication failed' });
+            res.render("common/error.ejs", { message: 'Login failed' });
         }
     } catch (error) {
         console.log(error);

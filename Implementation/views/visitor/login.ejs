@@ -5,6 +5,9 @@
             <div class="col-5 mt-3">
                 <div class="card">
                     <div class="card-body">
+                        <% if (typeof message !== 'undefined') { %>
+                            <h5 class="text-success"><%= message %></h5>
+                        <% } %>
                         <center><h5 class="card-title m-2">Login</h5></center>
                       <form action="/auth/login" method="POST">
                         <div class="form-group m-2">
