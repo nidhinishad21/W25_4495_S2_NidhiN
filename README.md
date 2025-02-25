@@ -1,6 +1,8 @@
 # FinTrack
 A web app where users can track income/expenses, set budgets, and visualize their financial habits with interactive charts.
 
+NOVELTY: Input data in Natural language (text). For e.g. "had $50 dinner" & Google Gemini will take care of everything.
+
 Tech Stack: Bootstrap with EJS (front-end) or Flutter
 
 Node.js (back-end) 
