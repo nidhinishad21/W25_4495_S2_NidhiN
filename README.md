@@ -10,6 +10,7 @@ MongoDB (database)
 Target Users: Individuals managing personal finances or small businesses who wants to track their cash flow. 
 
 Features: 
+
 -User Management (Login/Logout, profile management for each user. 
 
 -Visualization of expense and savings. 
