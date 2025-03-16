@@ -23,8 +23,14 @@
                            id="dateBootstrap" 
                            name="dateBootstrap"
                            required>
+                    <button type="submit" class="btn btn-primary mt-3">Show Expenses</button>
                 </div>
             </div>
+            <% if (locals.message) { %>
+                <div class="alert alert-success" role="alert">
+                    <%= message %>
+                </div>
+              <% } %>
             <div class="card-body">
                 <%- include('../layouts/piechart') %>
             </div>
