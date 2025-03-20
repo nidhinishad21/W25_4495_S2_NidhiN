@@ -1,28 +1,30 @@
-# FinTrack
+## FinTrack
 A web app where users can track income/expenses, set budgets, and visualize their financial habits with interactive charts.
 
-NOVELTY: Input data in Natural language (text). For e.g. "had $50 dinner" & Google Gemini will take care of everything.
+### NOVELTY
+Input data in Natural language (text). For e.g. "had $50 dinner" & Google Gemini will take care of everything.
 
-Tech Stack: Bootstrap with EJS (front-end) or Flutter
+### Tech Stack 
+* Bootstrap with EJS (front-end)
+* Node.js (back-end) 
+* MongoDB (database) 
 
-Node.js (back-end) 
+### Target Users
+Individuals managing personal finances or small businesses who wants to track their cash flow. 
 
-MongoDB (database) 
+### Features
+* User Management (Login/Logout, profile management for each user. 
+* Visualization of expense and savings. 
+* categorization of expenses (e.g. dining, grocery, rent, fuel) 
 
-Target Users: Individuals managing personal finances or small businesses who wants to track their cash flow. 
+### Pre-Requisites
+* Create a mongodb database from [Mongo DB Portal](https://www.mongodb.com/resources/products/fundamentals/create-database). Get the connection string and database name for this mongo database. Put this in .env file. 
+* Get a gemini API key from [Google AI Studio](https://aistudio.google.com/apikey). Put the key in .env file.
 
-Features: 
+### Run the App
 
--User Management (Login/Logout, profile management for each user. 
-
--Visualization of expense and savings. 
-
--categorization of expenses (e.g. dining, grocery, rent, fuel) 
-
-#To run the app
-
+```
 cd/Implementation
-
 npm i
-
 node index.js
+```
