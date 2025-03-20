@@ -7,7 +7,8 @@ Input data in Natural language (text). For e.g. "had $50 dinner" & Google Gemini
 ### Tech Stack 
 * Bootstrap with EJS (front-end)
 * Node.js (back-end) 
-* MongoDB (database) 
+* MongoDB (database)
+* Google Gemini Api for Natural Language Processing to structured data.  
 
 ### Target Users
 Individuals managing personal finances or small businesses who wants to track their cash flow. 
