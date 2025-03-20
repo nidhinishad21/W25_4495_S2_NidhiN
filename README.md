@@ -28,3 +28,12 @@ cd/Implementation
 npm i
 node index.js
 ```
+
+By default, the webApp runs at http://localhost:5000
+
+### Instructions Sample
+* Register a new account by clicking on register.
+* Login with this new account.
+* Start adding your expenses.
+
+  
