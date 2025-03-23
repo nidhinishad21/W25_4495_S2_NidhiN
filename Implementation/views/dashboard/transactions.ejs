@@ -1,4 +1,3 @@
-
 <%- include('../layouts/loggedheader'); -%>
 <div class="row">
     <div class="col-3">
@@ -9,10 +8,49 @@
     <div class="col-6">
         <div class="card shadow m-3">
             <div class="card-header">
-                <h3>Expenses this month</h3>
+                <h3 class="card-title">Expenses this month</h3>
             </div>
             <div class="card-body">
-                Some transacations will be displayed here.
+                <div class="table-responsive">
+                    <% if(typeof success_msg !== 'undefined' && success_msg != ''){ %>
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <%= success_msg %>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    <% } %>
+                    <table class="table table-striped">
+                        <thead class="table-dark">
+                        <tr>
+                            <th scope="col">Expense</th>
+                            <th scope="col">Amount</th>
+                            <th scope="col">Category</th>
+                            <th scope="col">Date</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <% expenses.forEach(expense => { %>
+                            <tr>
+                            <td><%= expense.expense %></td>
+                            <td>$<%= expense.amount.toFixed(2) %></td>
+                            <td><%= expense.category %></td>
+                            <td><%= new Date(expense.date).toLocaleDateString() %></td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                <a href="/dashboard/transactions/edit/<%= expense._id %>" class="btn btn-sm btn-primary">Edit</a>
+                                <a href="/dashboard/transactions/delete/<%= expense._id %>" class="btn btn-sm btn-danger">Delete</a>
+                                </div>
+                            </td>
+                            </tr>
+                        <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+                <% if (expenses.length === 0) { %>
+                <div class="alert alert-info">
+                    No expenses found. Add your first expense to get started.
+                </div>
+                <% } %>
             </div>
         </div>
     </div>
