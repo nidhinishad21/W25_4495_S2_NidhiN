@@ -13,12 +13,6 @@ router.get('/', verifyToken, async(req, res) => {
     res.render("dashboard/home.ejs" , { path: '/dashboard', firstname: firstname, c_data: p_data});
  });
 
- router.get('/insights', verifyToken, (req, res) => {
-    res.render('dashboard/insights.ejs', {
-        path: '/dashboard/insights',
-        firstname: req.firstname
-    });
-});
 router.get('/transactions', verifyToken, (req, res) => {
     res.render('dashboard/transactions.ejs', {
         path: '/dashboard/transactions',
@@ -137,6 +131,32 @@ router.post('/add-expense', verifyToken, async (req, res) => {
     
 });
 
+router.get("/insights", verifyToken, async (req, res) => {
+  const expenses = await getExpenses(req.username);
 
+  let prompt =
+    'Give me summary, insights and some suggestions for expenses for this data in json only.\
+     Assume the user is in Vancouver, Canada. Take this into consideration as well. \
+    In the format {"Summary", "Some summary", "Insight" : "Some insight", "Suggestion" : "Some suggestion"}. Encode your data for \' \
+    Keep it simple to understand. Expenses are in json as follows: ' + expenses;
+
+  let insights = await askGemini(prompt);
+  res.render("dashboard/insights.ejs", {
+    path: "/dashboard/insights",
+    firstname: req.firstname,
+    insights: insights,
+  });
+});
+
+/**
+ Everything related to categories is going to be here.
+ */
+
+router.get("/categories", verifyToken, (req, res) => {
+  res.render("dashboard/categories.ejs", {
+    path: "/dashboard/categories",
+    firstname: req.firstname,
+  });
+});
 
  module.exports = router;
