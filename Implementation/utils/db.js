@@ -1,4 +1,4 @@
-let mongoose = require('mongoose');
+let mongoose = require("mongoose");
 
 class Database {
   constructor() {
@@ -7,12 +7,12 @@ class Database {
 
   _connect() {
     mongoose
-      .connect(`mongodb+srv://dbPractice:62dlIxUYBhDGArPI@cluster0.isquhpy.mongodb.net/fintrack?retryWrites=true&w=majority&appName=Cluster0`)
+      .connect(process.env.MONGO_DB_CONNECTION_STRING)
       .then(() => {
-        console.log('Database connection successful');
+        console.log("Database connection successful");
       })
       .catch((err) => {
-        console.error('Database connection error');
+        console.error("Database connection error");
       });
   }
 }

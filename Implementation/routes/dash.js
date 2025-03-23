@@ -23,7 +23,7 @@ async function askGemini(
   model = "gemini-2.0-flash"
 ) {
   try {
-    const url = https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey};
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
     const response = await fetch(url, {
       method: "POST",
@@ -50,7 +50,7 @@ async function askGemini(
     const responseText = data.candidates[0].content.parts[0].text;
     console.log(responseText);
 
-    const cleanedJson = responseText.replace(/json|/g, "").trim();
+    const cleanedJson = responseText.replace(/```json|```/g, "").trim();
     console.log(cleanedJson);
     expense_json = JSON.parse(cleanedJson);
 
