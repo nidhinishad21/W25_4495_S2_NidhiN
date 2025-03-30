@@ -8,12 +8,33 @@ const User = require("../models/User");
 router.get("/", verifyToken, async (req, res) => {
   let firstname = req.firstname;
 
-  let p_data = await getExpensesByCategory(req.username);
+  // Calculate first and last day of current month if no dates provided
+  const today = new Date();
+  const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+  const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+  
+  const formatDate = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+  
+  const defaultFrom = formatDate(firstDay);
+  const defaultTo = formatDate(lastDay);
+
+  let p_data = await getExpensesByCategoryOnDateRange(
+    req.username,
+    firstDay,
+    lastDay
+  );
 
   res.render("dashboard/home.ejs", {
     path: "/dashboard",
     firstname: firstname,
     c_data: p_data,
+    from: defaultFrom,
+    to: defaultTo,
   });
 });
 
@@ -31,35 +52,13 @@ router.get('/date-range', verifyToken, async (req, res) => {
     // Convert string dates to Date objects
     const startDate = new Date(from);
     const endDate = new Date(to);
+
+    let p_data = await getExpensesByCategoryOnDateRange(
+      req.username,
+      startDate,
+      endDate
+    );
     
-    // Set endDate to end of day
-    endDate.setHours(23, 59, 59, 999);
-    const username = req.username;
-    
-    const user = await User.findOne({ username });
-  
-    // Query expenses within date range for this user
-    const expenses = await Expense.find({
-      user: user._id,
-      date: {
-        $gte: startDate,
-        $lte: endDate
-      }
-    }).sort({ date: 1 });
-
-
-    const categoryTotals = {};
-
-    // Sum amounts by category
-    expenses.forEach(({ category, amount }) => {
-      categoryTotals[category] = (categoryTotals[category] || 0) + amount;
-    });
-
-    // Create data arrays for visualization
-    const p_data = {
-      labels: Object.keys(categoryTotals),
-      values: Object.values(categoryTotals),
-    };
     
     res.render("dashboard/home.ejs", {
       path: "/dashboard",
@@ -143,6 +142,40 @@ async function getExpenses(username) {
   const expenses = await Expense.find({ user: user._id }).sort({ date: -1 });
   return expenses;
 }
+
+async function getExpensesByCategoryOnDateRange(username, from, to) {
+
+  // Set endDate to end of day
+  to.setHours(23, 59, 59, 999);
+  
+  const user = await User.findOne({ username });
+
+  // Query expenses within date range for this user
+  const expenses = await Expense.find({
+    user: user._id,
+    date: {
+      $gte: from,
+      $lte: to
+    }
+  }).sort({ date: -1 });
+
+
+  const categoryTotals = {};
+
+  // Sum amounts by category
+  expenses.forEach(({ category, amount }) => {
+    categoryTotals[category] = (categoryTotals[category] || 0) + amount;
+  });
+
+  // Create data arrays for visualization
+  const p_data = {
+    labels: Object.keys(categoryTotals),
+    values: Object.values(categoryTotals),
+  };
+  return p_data;
+
+}
+
 
 async function getExpensesByCategory(username) {
   const expenses = await getExpenses(username);
