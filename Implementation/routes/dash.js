@@ -17,6 +17,68 @@ router.get("/", verifyToken, async (req, res) => {
   });
 });
 
+
+router.get('/date-range', verifyToken, async (req, res) => {
+  try {
+    // Get from and to dates from query parameters
+    const { from, to } = req.query;
+    
+    // Validate input
+    if (!from || !to) {
+      return res.status(400).json({ message: 'Both from and to dates are required' });
+    }
+    
+    // Convert string dates to Date objects
+    const startDate = new Date(from);
+    const endDate = new Date(to);
+    
+    // Set endDate to end of day
+    endDate.setHours(23, 59, 59, 999);
+    const username = req.username;
+    
+    const user = await User.findOne({ username });
+  
+    // Query expenses within date range for this user
+    const expenses = await Expense.find({
+      user: user._id,
+      date: {
+        $gte: startDate,
+        $lte: endDate
+      }
+    }).sort({ date: 1 });
+
+
+    const categoryTotals = {};
+
+    // Sum amounts by category
+    expenses.forEach(({ category, amount }) => {
+      categoryTotals[category] = (categoryTotals[category] || 0) + amount;
+    });
+
+    // Create data arrays for visualization
+    const p_data = {
+      labels: Object.keys(categoryTotals),
+      values: Object.values(categoryTotals),
+    };
+    
+    res.render("dashboard/home.ejs", {
+      path: "/dashboard",
+      firstname: req.firstname,
+      c_data: p_data,
+      from: from,
+      to: to,
+    });
+    
+  } catch (error) {
+    console.error("Error:", error);
+    res.render("common/error.ejs", {
+      message: "Failed to add expense. Please try again.",
+    });
+  }
+});
+
+
+
 async function askGemini(
   prompt,
   apiKey = process.env.GOOGLE_API_KEY,

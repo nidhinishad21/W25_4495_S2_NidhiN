@@ -9,21 +9,35 @@
     <div class="col-6">
         <div class="card shadow m-3">
             <div class="card-header">
-                <h3>Expenses this month</h3>
-                <div class="mb-3">
-                    <label for="dateBootstrap" class="form-label">From</label>
-                    <input type="date" 
-                           class="form-control" 
-                           id="dateBootstrap" 
-                           name="dateBootstrap"
-                           required>
-                    <label for="dateBootstrap" class="form-label">To</label>
-                    <input type="date" 
-                           class="form-control" 
-                           id="dateBootstrap" 
-                           name="dateBootstrap"
-                           required>
-                    <button type="submit" class="btn btn-primary mt-3">Show Expenses</button>
+                <% if (locals.date_range) { %>
+                    <h3>Expense from <%= locals.from %> to <%= locals.to %></h3>
+                    </div>
+                <% } else { %>
+                    <h3>Expenses</h3>
+                <% } %>
+                <div class="card-body">
+                    <p class="card-text">Select a date range to view your expenses.</p>
+                    <form action="/dashboard/date-range" method="GET">
+                    <div class="mb-3">
+                        <label for="from" class="form-label">From</label>
+                        <input type="date"
+                        class="form-control"
+                        id="from"
+                        name="from"
+                        value="<%= locals.from ? from : new Date().toISOString().split('T')[0] %>"
+                        required>
+                        
+                        <label for="to" class="form-label">To</label>
+                        <input type="date"
+                        class="form-control"
+                        id="to"
+                        name="to"
+                        value="<%= locals.to ? to : new Date().toISOString().split('T')[0] %>"
+                        required>
+                        
+                        <button type="submit" class="btn btn-primary mt-3">Show Expenses</button>
+                    </div>
+                    </form>
                 </div>
             </div>
             <% if (locals.message) { %>
