@@ -46,7 +46,9 @@ router.get('/date-range', verifyToken, async (req, res) => {
     
     // Validate input
     if (!from || !to) {
-      return res.status(400).json({ message: 'Both from and to dates are required' });
+      res.render("common/error.ejs", {
+        message: "Both from and to dates are required",
+      });
     }
     
     // Convert string dates to Date objects
@@ -143,6 +145,12 @@ async function getExpenses(username) {
   return expenses;
 }
 
+async function getExpensesonDateRange(username, from, to) {
+  const user = await User.findOne({ username });
+  const expenses = await Expense.find({ user: user._id, date: { $gte: from, $lte: to } }).sort({ date: -1 });
+  return expenses;
+}
+
 async function getExpensesByCategoryOnDateRange(username, from, to) {
 
   // Set endDate to end of day
@@ -232,7 +240,22 @@ router.post("/add-expense", verifyToken, async (req, res) => {
 });
 
 router.get("/insights", verifyToken, async (req, res) => {
-  const expenses = await getExpenses(req.username);
+  // Calculate first and last day of current month if no dates provided
+  const today = new Date();
+  const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+  const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+  
+  const formatDate = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+  
+  const defaultFrom = formatDate(firstDay);
+  const defaultTo = formatDate(lastDay);
+
+  const expenses = await getExpensesonDateRange(req.username, defaultFrom, defaultTo);
 
   let prompt =
     'Give me summary, insights and some suggestions for expenses for this data in json only.\
@@ -263,14 +286,67 @@ router.get("/categories", verifyToken, (req, res) => {
  Everything related to transactions is going to be here.
  */
 
-router.get("/transactions", verifyToken, async (req, res) => {
+ router.get('/transactions/date-range', verifyToken, async (req, res) => {
   try {
-    const expenses = await getExpenses(req.username);
+    // Get from and to dates from query parameters
+    const { from, to } = req.query;
+    
+    // Validate input
+    if (!from || !to) {
+      res.render("common/error.ejs", {
+        message: "Both from and to dates are required",
+      });
+    }
+    
+    // Convert string dates to Date objects
+    const startDate = new Date(from);
+    const endDate = new Date(to);
+
+    const expenses = await getExpensesonDateRange(req.username, startDate, endDate);
     res.render("dashboard/transactions.ejs", {
       path: "/dashboard/transactions",
       firstname: req.firstname,
       expenses: expenses,
       success_msg: req.query.success_msg || "",
+      from: from,
+      to: to,
+    });
+
+  } catch (error) {
+    console.error("Error:", error);
+    res.render("common/error.ejs", {
+      message: "Failed to fetch expenses. Please try again.",
+    });
+  }
+});
+
+router.get("/transactions", verifyToken, async (req, res) => {
+  try {
+
+    // Calculate first and last day of current month if no dates provided
+    const today = new Date();
+    const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+    const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    
+    const formatDate = (date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+    
+    const defaultFrom = formatDate(firstDay);
+    const defaultTo = formatDate(lastDay);
+
+
+    const expenses = await getExpensesonDateRange(req.username, defaultFrom, defaultTo);
+    res.render("dashboard/transactions.ejs", {
+      path: "/dashboard/transactions",
+      firstname: req.firstname,
+      expenses: expenses,
+      success_msg: req.query.success_msg || "",
+      from: defaultFrom,
+      to: defaultTo,
     });
   } catch (error) {
     console.error("Error:", error);
