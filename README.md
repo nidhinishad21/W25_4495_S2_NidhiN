@@ -2,7 +2,7 @@
 A web app where users can track income/expenses, set budgets, and visualize their financial habits with interactive charts.
 
 ### NOVELTY
-Input data in Natural language (text). For e.g. "had $50 dinner" & Google Gemini will take care of everything.
+Input data in Natural language (text). For e.g. "had $50 dinner" & Google Gemini will take care of everything. 
 
 ### Tech Stack 
 * Bootstrap with EJS (front-end)
@@ -14,7 +14,7 @@ Individuals managing personal finances or small businesses who wants to track th
 
 ### Features
 * User Management (Login/Logout, profile management for each user. 
-* Visualization of expense and savings. 
+* Visualization of expense and savings with real-time insights from Google Gemini.
 * categorization of expenses (e.g. dining, grocery, rent, fuel) 
 
 ### Pre-Requisites
