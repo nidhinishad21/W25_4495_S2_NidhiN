@@ -154,7 +154,7 @@ async function getExpensesonDateRange(username, from, to) {
 async function getExpensesByCategoryOnDateRange(username, from, to) {
 
   // Set endDate to end of day
-  to.setHours(23, 59, 59, 999);
+  // to.setHours(23, 59, 59, 999);
   
   const user = await User.findOne({ username });
 
@@ -223,7 +223,26 @@ router.post("/add-expense", verifyToken, async (req, res) => {
     let expense_json = await askGemini(prompt);
     await saveExpense(expense_json, req.username);
 
-    let p_data = await getExpensesByCategory(req.username);
+    // Calculate first and last day of current month if no dates provided
+    const today = new Date();
+    const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+    const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    
+    const formatDate = (date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+    
+    const defaultFrom = formatDate(firstDay);
+    const defaultTo = formatDate(lastDay);
+
+    let p_data = await getExpensesByCategoryOnDateRange(
+      req.username,
+      defaultFrom,
+      defaultTo
+    );
 
     res.render("dashboard/home.ejs", {
       path: "/dashboard",
@@ -257,29 +276,74 @@ router.get("/insights", verifyToken, async (req, res) => {
 
   const expenses = await getExpensesonDateRange(req.username, defaultFrom, defaultTo);
 
-  let prompt =
-    'Give me summary, insights and some suggestions for expenses for this data in json only.\
-     Assume the user is in Vancouver, Canada. Take this into consideration as well. \
-    In the format {"Summary", "Some summary", "Insight" : "Some insight", "Suggestion" : "Some suggestion"}. Encode your data for \' \
-    Keep it simple to understand. Expenses are in json as follows: ' + expenses;
+  if (expenses.length === 0) {
+    res.render("dashboard/insights.ejs", {
+      path: "/dashboard/insights",
+      firstname: req.firstname,
+      insights:  {
+        Summary: "No expenses found",
+        Insight: "You have not made any expenses in this period.",
+        Suggestion: "Try adding some expenses to get insights.",
+      }
+    });
+  } else {
+    let prompt =
+      'Give me summary, insights and some suggestions for expenses for this data in json only.\
+      Assume the user is in Vancouver, Canada. Take this into consideration as well. \
+      In the format {"Summary", "Some summary", "Insight" : "Some insight", "Suggestion" : "Some suggestion"}. Encode your data for \' \
+      Keep it simple to understand. Expenses are in json as follows: ' + expenses;
 
-  let insights = await askGemini(prompt);
-  res.render("dashboard/insights.ejs", {
-    path: "/dashboard/insights",
-    firstname: req.firstname,
-    insights: insights,
-  });
+    let insights = await askGemini(prompt);
+    res.render("dashboard/insights.ejs", {
+      path: "/dashboard/insights",
+      firstname: req.firstname,
+      insights: insights,
+    });
+  }
 });
 
 /**
  Everything related to categories is going to be here.
  */
 
-router.get("/categories", verifyToken, (req, res) => {
-  res.render("dashboard/categories.ejs", {
-    path: "/dashboard/categories",
-    firstname: req.firstname,
-  });
+router.get("/categories", verifyToken, async (req, res) => {
+
+  // Calculate first and last day of current month if no dates provided
+  const today = new Date();
+  const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+  const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+  
+  const formatDate = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+  
+  const defaultFrom = formatDate(firstDay);
+  const defaultTo = formatDate(lastDay);
+
+  const expenses = await getExpensesByCategoryOnDateRange(req.username, defaultFrom, defaultTo);
+  
+  if (expenses.length === 0) {
+    res.render("dashboard/categories.ejs", {
+      path: "/dashboard/categories",
+      firstname: req.firstname,
+      message: "No expenses found",
+      expenses: [],
+      from: defaultFrom,
+      to: defaultTo,
+    });
+  } else {
+    res.render("dashboard/categories.ejs", {
+      path: "/dashboard/categories",
+      firstname: req.firstname,
+      expenses: expenses,
+      message: "",
+      from: defaultFrom,
+      to: defaultTo,
+    });
+  }
 });
 
 /**

@@ -9,10 +9,71 @@
     <div class="col-6">
         <div class="card shadow m-3">
             <div class="card-header">
-                <h3>Expenses this month</h3>
+                <% if (locals.date_range) { %>
+                    <h3>Expense from <%= locals.from %> to <%= locals.to %></h3>
+                    </div>
+                <% } else { %>
+                    <h3>Expenses this month</h3>
+                <% } %>
             </div>
             <div class="card-body">
-                Some categories will be displayed here.
+                <p class="card-text">Select a date range to view your category expenses.</p>
+                <form action="/dashboard/transactions/date-range" method="GET">
+                <div class="mb-3">
+                    <label for="from" class="form-label">From</label>
+                    <input type="date"
+                    class="form-control"
+                    id="from"
+                    name="from"
+                    value="<%= locals.from ? from : new Date().toISOString().split('T')[0] %>"
+                    required>
+                    
+                    <label for="to" class="form-label">To</label>
+                    <input type="date"
+                    class="form-control"
+                    id="to"
+                    name="to"
+                    value="<%= locals.to ? to : new Date().toISOString().split('T')[0] %>"
+                    required>
+                    
+                    <button type="submit" class="btn btn-primary mt-3">Show Categories</button>
+                </div>
+                </form>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <% if(typeof success_msg !== 'undefined' && success_msg != ''){ %>
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <%= success_msg %>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    <% } %>
+                    <table class="table table-striped">
+                        <thead class="table-dark">
+                        <tr>
+                            <th scope="col">Category</th>
+                            <th scope="col">Amount</th>
+                        </tr>
+                        </thead>
+                    </table>
+                </div>
+                <% if (expenses.length === 0) { %>
+                <div class="alert alert-info">
+                    No expenses found. Add your first expense to get started.
+                </div>
+                <% } %>
+
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <tbody>
+                        <% for (var i = 0; i < expenses.labels.length; i++) { %>
+                            <tr>
+                            <td><%= expenses.labels[i]%></td>
+                            <td>$<%= expenses.values[i].toFixed(2) %></td>
+                            </tr>
+                        <% } %>
+                        </tbody>
+                    </table>
             </div>
         </div>
     </div>
