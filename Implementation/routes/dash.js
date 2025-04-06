@@ -346,6 +346,45 @@ router.get("/categories", verifyToken, async (req, res) => {
   }
 });
 
+router.get("/categories/date-range", verifyToken, async (req, res) => {
+
+  // Get from and to dates from query parameters
+  const { from, to } = req.query;
+    
+  // Validate input
+  if (!from || !to) {
+    res.render("common/error.ejs", {
+      message: "Both from and to dates are required",
+    });
+  }
+  
+  // Convert string dates to Date objects
+  const startDate = new Date(from);
+  const endDate = new Date(to);
+
+  const expenses = await getExpensesByCategoryOnDateRange(req.username, startDate, endDate);
+  
+  if (expenses.length === 0) {
+    res.render("dashboard/categories.ejs", {
+      path: "/dashboard/categories",
+      firstname: req.firstname,
+      message: "No expenses found",
+      expenses: [],
+      from: from,
+      to: to,
+    });
+  } else {
+    res.render("dashboard/categories.ejs", {
+      path: "/dashboard/categories",
+      firstname: req.firstname,
+      expenses: expenses,
+      message: "",
+      from: from,
+      to: to,
+    });
+  }
+});
+
 /**
  Everything related to transactions is going to be here.
  */
