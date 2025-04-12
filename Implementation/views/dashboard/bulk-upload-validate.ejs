@@ -1,0 +1,75 @@
+<%- include('../layouts/loggedheader'); -%>
+<div class="row">
+  <div class="col-3">
+    <div class="d-flex flex-column">
+      <%- include('../layouts/sidebar'); -%>
+    </div>
+  </div>
+  <div class="col-9">
+    <div class="card shadow m-3">
+      <div class="card-header">
+        <h3>Validate Expenses</h3>
+      </div>
+      <div class="card-body">
+        <p class="card-text">Please review the expenses extracted from your CSV file. You can make any necessary edits before saving to your account.</p>
+        
+        <form action="/dashboard/bulk-upload/save" method="POST">
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Description</th>
+                  <th>Amount</th>
+                  <th>Category</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% expenses.forEach((expense, index) => { %>
+                  <tr>
+                    <td>
+                      <input type="text" class="form-control" name="expenses[<%= index %>][expense]" value="<%= expense.expense %>" required>
+                    </td>
+                    <td>
+                      <input type="number" step="0.01" class="form-control" name="expenses[<%= index %>][amount]" value="<%= expense.amount %>" required>
+                    </td>
+                    <td>
+                      <select class="form-select" name="expenses[<%= index %>][category]" required>
+                        <option value="" disabled>Select category</option>
+                        <option value="Food" <%= expense.category === 'Food' ? 'selected' : '' %>>Food</option>
+                        <option value="Transportation" <%= expense.category === 'Transportation' ? 'selected' : '' %>>Transportation</option>
+                        <option value="Housing" <%= expense.category === 'Housing' ? 'selected' : '' %>>Housing</option>
+                        <option value="Entertainment" <%= expense.category === 'Entertainment' ? 'selected' : '' %>>Entertainment</option>
+                        <option value="Healthcare" <%= expense.category === 'Healthcare' ? 'selected' : '' %>>Healthcare</option>
+                        <option value="Shopping" <%= expense.category === 'Shopping' ? 'selected' : '' %>>Shopping</option>
+                        <option value="Utilities" <%= expense.category === 'Utilities' ? 'selected' : '' %>>Utilities</option>
+                        <option value="Other" <%= (expense.category !== 'Food' && 
+                                                 expense.category !== 'Transportation' && 
+                                                 expense.category !== 'Housing' && 
+                                                 expense.category !== 'Entertainment' && 
+                                                 expense.category !== 'Healthcare' && 
+                                                 expense.category !== 'Shopping' && 
+                                                 expense.category !== 'Utilities') ? 'selected' : '' %>>Other</option>
+                      </select>
+                    </td>
+                    <td>
+                      <input type="date" class="form-control" name="expenses[<%= index %>][date]" 
+                        value="<%= new Date(expense.date).toISOString().split('T')[0] %>" required>
+                    </td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+          
+          <div class="d-flex justify-content-between mt-4">
+            <a href="/dashboard/bulk-upload" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">Save All Expenses</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<%- include('../layouts/floating-button') %>
+<%- include('../layouts/footer'); -%>

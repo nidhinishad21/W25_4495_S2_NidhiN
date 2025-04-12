@@ -4,6 +4,11 @@ const router = express.Router();
 const verifyToken = require("../middleware/authMiddleware");
 const Expense = require("../models/Expense");
 const User = require("../models/User");
+const multer = require('multer');
+const fs = require('fs');
+const csv = require('csv-parser');
+const jwt = require('jsonwebtoken');
+const path = require('path');
 
 router.get("/", verifyToken, async (req, res) => {
   let firstname = req.firstname;
@@ -324,7 +329,7 @@ router.get("/categories", verifyToken, async (req, res) => {
   const defaultTo = formatDate(lastDay);
 
   const expenses = await getExpensesByCategoryOnDateRange(req.username, defaultFrom, defaultTo);
-  
+
   if (expenses.length === 0) {
     res.render("dashboard/categories.ejs", {
       path: "/dashboard/categories",
@@ -585,6 +590,182 @@ router.post("/transactions/edit/:id", verifyToken, async (req, res) => {
     console.error("Error updating expense:", error);
     res.render("common/error.ejs", {
       message: "Failed to update expense. Please try again.",
+    });
+  }
+});
+
+
+// Bulk Upload route
+
+// Create uploads directory if it doesn't exist
+const uploadsDir = path.join(__dirname, '../uploads');
+if (!fs.existsSync(uploadsDir)){
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+// Set up multer for file uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, '../uploads/'));
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + '-' + file.originalname);
+  }
+});
+
+const upload = multer({ 
+  storage: storage,
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === 'text/csv') {
+      cb(null, true);
+    } else {
+      cb(new Error('Only CSV files are allowed'), false);
+    }
+  }
+});
+
+// Route that renders the bulk upload page
+router.get("/bulk-upload", verifyToken, async (req, res) => {
+  try {
+    res.render("dashboard/bulk-upload.ejs", {
+      path: "/dashboard/bulk-upload",
+      firstname: req.firstname,
+      message: ""
+    });
+  } catch (error) {
+    console.error("Error:", error);
+    res.render("common/error.ejs", {
+      message: "Failed to load bulk upload page. Please try again."
+    });
+  }
+});
+
+// Route to handle the CSV upload and validate with Gemini
+router.post("/bulk-upload/validate", verifyToken, upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.render("dashboard/bulk-upload.ejs", {
+        path: "/dashboard/bulk-upload",
+        firstname: req.firstname,
+        message: "Please upload a CSV file."
+      });
+    }
+
+    const results = [];
+    
+    // Read and parse the CSV file
+    fs.createReadStream(req.file.path)
+      .pipe(csv())
+      .on('data', (data) => results.push(data))
+      .on('end', async () => {
+        try {
+          // Process the CSV data with Gemini
+
+          let prompt =
+          'Give me json response only for these expenses in json array format \
+            [{"expense": "expense name", "amount": "amount", category: "category", date: "date"}] for ' +
+          JSON.stringify(results) +
+          '. Example [{"expense": "rent", "amount": "1000", category: "housing", date: "2025-04-09"}, {"expense": "movie", "amount": "10", category: "entertainment", date: "2025-03-15"}]. \
+            Allowed categories are housing, food, transportation, utilities, clothing, insurance, \
+            medical, personal, debt, savings, entertainment, education, gifts, donations, investments, others. \
+            If you are unable to categories the category, write "others" in the category field. \
+            If you are unable to provide this information, give me error json response in the format {"error": "error message"}.';
+
+          const processedData = await askGemini(prompt);
+          
+          // Create a temporary JWT token to store the processed data
+          const tempToken = jwt.sign(
+            { bulkExpenses: processedData },
+            'your-secret-key',
+            { expiresIn: '1h' } // Short expiration time for security
+          );
+          
+          // Set the temporary token as a cookie
+          res.cookie('temp-expenses', tempToken, {
+            httpOnly: true,
+            maxAge: 3600000 // 1 hour in milliseconds
+          });
+          
+          // Render the validation page
+          res.render("dashboard/bulk-upload-validate.ejs", {
+            path: "/dashboard/bulk-upload/validate",
+            firstname: req.firstname,
+            expenses: processedData
+          });
+          
+          // Delete the temporary file
+          fs.unlinkSync(req.file.path);
+        } catch (error) {
+          console.error("Error processing data:", error);
+          res.render("common/error.ejs", {
+            message: "Failed to process CSV data. Please check your file format and try again."
+          });
+        }
+      });
+  } catch (error) {
+    console.error("Error uploading file:", error);
+    res.render("common/error.ejs", {
+      message: "Failed to upload file. Please try again."
+    });
+  }
+});
+
+// Route to save validated expenses to MongoDB
+router.post("/bulk-upload/save", verifyToken, async (req, res) => {
+  try {
+    // Get the processed expenses from the JWT token in cookies
+    const tempToken = req.cookies['temp-expenses'];
+    const username = req.username;
+    
+    if (!tempToken) {
+      return res.render("common/error.ejs", {
+        message: "No expenses found to save. Please upload your CSV file again."
+      });
+    }
+    
+    // Verify and decode the token
+    const decoded = jwt.verify(tempToken, 'your-secret-key');
+    const expenses = decoded.bulkExpenses;
+    
+    if (!expenses || expenses.length === 0) {
+      return res.render("common/error.ejs", {
+        message: "No expenses found to save. Please upload your CSV file again."
+      });
+    }
+    
+    // Check if the form data contains updated expenses
+    let expensesToSave = expenses;
+    if (req.body.expenses && Array.isArray(req.body.expenses)) {
+      expensesToSave = req.body.expenses;
+    }
+    
+    const user = await User.findOne({ username });
+
+    // Create expense documents in MongoDB
+    const expenseDocuments = expensesToSave.map(exp => ({
+      expense: exp.expense,
+      amount: parseFloat(exp.amount),
+      category: exp.category,
+      date: new Date(exp.date),
+      user: user._id, // From the verifyToken middleware
+    }));
+    
+    // Save all expenses to MongoDB
+    await Expense.insertMany(expenseDocuments);
+    
+    // Clear the temporary cookie
+    res.clearCookie('temp-expenses');
+    
+    // Render success page
+    res.render("dashboard/upload-success.ejs", {
+      path: "/dashboard/bulk-upload",
+      firstname: req.firstname,
+      count: expenseDocuments.length
+    });
+  } catch (error) {
+    console.error("Error saving expenses:", error);
+    res.render("common/error.ejs", {
+      message: "Failed to save expenses to database. Please try again."
     });
   }
 });
